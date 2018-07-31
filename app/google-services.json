@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "813927060684",
+    "firebase_url": "https://birthdayapp-34806.firebaseio.com",
+    "project_id": "birthdayapp-34806",
+    "storage_bucket": "birthdayapp-34806.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:813927060684:android:d4dc6c5b542c618b",
+        "android_client_info": {
+          "package_name": "com.range.birthdayapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "813927060684-929n42mq06mts44uesd84a2ugsmauel0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.range.birthdayapp",
+            "certificate_hash": "78fd62ccc86771ecb9fce293e36d712225b45893"
+          }
+        },
+        {
+          "client_id": "813927060684-b2vcbcd8u27a8rtp7q6e7irbihu7vbgq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACLt66F8ZmfGwZCTCorHnOf7i2pRLkl8Q"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "813927060684-b2vcbcd8u27a8rtp7q6e7irbihu7vbgq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
