@@ -103,7 +103,7 @@ public class first_Activity extends AppCompatActivity {
     final ArrayList<String> pids = new ArrayList<>();
 
 
-    void insert(birthdaypost b) throws java.text.ParseException {
+    void insert(birthdaypost b) throws java.text.ParseException, ArrayIndexOutOfBoundsException {
         int i = 0, j;
         ArrayList<Date> dateobj = new ArrayList<Date>();
         for (i = 0; i < dobs.size(); i++)
@@ -112,7 +112,7 @@ public class first_Activity extends AppCompatActivity {
         String t;
         b.setDob(converttocurrent(b.getDob()));
         Date dob = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).parse(b.getDob());
-        for (i = 0; !dateobj.isEmpty()&& i<dateobj.size() && dob.after(dateobj.get(i)); i++) {
+        for (i = 0; !dateobj.isEmpty() && i < dateobj.size() && dob.after(dateobj.get(i)); i++) {
 
         }
         dobs.add(i, b.getDob());
@@ -154,7 +154,7 @@ public class first_Activity extends AppCompatActivity {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 birthdaypost b = dataSnapshot.getValue(birthdaypost.class);
-                if (b.getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid()) && dobs.size()<10) {
+                if (b.getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid()) && dobs.size() < 10) {
                     try {
                         insert(b);
                         customAdapter.notifyDataSetChanged();
@@ -262,25 +262,20 @@ public class first_Activity extends AppCompatActivity {
 
 
     }
-    public String convert(String d,String curr)
-    {
-        String s[]=new String[3];
-        String c[]=new String[3];
-        s=d.split("/");
-        c=curr.split("/");
-        StringBuilder end=new StringBuilder();
-        if(s[1].compareTo(c[1])<0)
-        {
-            end.append(s[0]+"/"+s[1]+"/"+"2019");
 
-        }
-        else if(s[1].equals(c[1]) && s[0].compareTo(c[0])<0)
-        {
-            end.append(s[0]+"/"+s[1]+"/"+"2019");
-        }
-        else
-        {
-            end.append(s[0]+"/"+s[1]+"/"+"2018");
+    public String convert(String d, String curr) {
+        String s[] = new String[3];
+        String c[] = new String[3];
+        s = d.split("/");
+        c = curr.split("/");
+        StringBuilder end = new StringBuilder();
+        if (s[1].compareTo(c[1]) < 0) {
+            end.append(s[0] + "/" + s[1] + "/" + "2019");
+
+        } else if (s[1].equals(c[1]) && s[0].compareTo(c[0]) < 0) {
+            end.append(s[0] + "/" + s[1] + "/" + "2019");
+        } else {
+            end.append(s[0] + "/" + s[1] + "/" + "2018");
         }
         return end.toString();
 
@@ -293,10 +288,10 @@ public class first_Activity extends AppCompatActivity {
         Date da = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).parse(d);
         //String s[]=new String[3];
 
-        String dafinal=convert(d,curr);
+        String dafinal = convert(d, curr);
         //else
-            //dafinal=da.toString()+"/2018";
-        Log.d("TAG", "dafinal = "+dafinal);
+        //dafinal=da.toString()+"/2018";
+        Log.d("TAG", "dafinal = " + dafinal);
         return dafinal;
 
 
