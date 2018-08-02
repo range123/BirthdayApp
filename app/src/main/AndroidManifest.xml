@@ -20,7 +20,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".first_Activity" />
-        <activity android:name=".addactivity"></activity>
+        <activity android:name=".addactivity" />
+        <activity android:name=".offlineact"></activity>
     </application>
 
 </manifest>

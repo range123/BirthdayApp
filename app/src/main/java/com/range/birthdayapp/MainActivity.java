@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
             else
             {
                 Toast.makeText(this, "Internet not available", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(getApplicationContext(),offlineact.class));
             }
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
