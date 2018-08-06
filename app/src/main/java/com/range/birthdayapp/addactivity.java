@@ -1,12 +1,16 @@
 package com.range.birthdayapp;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -23,6 +27,10 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+
 public class addactivity extends AppCompatActivity {
     Uri currImageURI;
     ImageView pic;
@@ -30,12 +38,25 @@ public class addactivity extends AppCompatActivity {
     StorageReference storageReference;
     TextView url;
     String download;
+    int SELECT_PHONE_NUMBER=5;
+    EditText phnedit =null;
 
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (resultCode == RESULT_OK) {
+            if(requestCode==SELECT_PHONE_NUMBER)
+            {
+                Uri contacturi=data.getData();
+                String[] projection = new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER};
+                Cursor cursor=getApplicationContext().getContentResolver().query(contacturi,projection,null,null,null);
+                if(cursor !=null && cursor.moveToFirst()){
+                    int numberindex=cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                    String number=cursor.getString(numberindex);
+                    phnedit.setText(number.replaceAll("\\s+",""));
+                }
+            }
 
             if (requestCode == 1) {
                 EditText nameedit=(EditText)findViewById(R.id.name);
@@ -88,20 +109,51 @@ public class addactivity extends AppCompatActivity {
         }
     }
 
+    Calendar c = null;
+    EditText dobedit = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_addactivity);
         final EditText nameedit = (EditText) findViewById(R.id.name);
-        final EditText dobedit = (EditText) findViewById(R.id.dob);
-        final EditText phnedit = (EditText) findViewById(R.id.phone);
+        dobedit = (EditText) findViewById(R.id.dob);
+        final Button contact=(Button) findViewById(R.id.contactpick);
         url = (TextView) findViewById(R.id.url);
         pic = (ImageView) findViewById(R.id.imgview);
+        phnedit =(EditText) findViewById(R.id.phone);
         Button photo = (Button) findViewById(R.id.photobut);
         Button post = (Button) findViewById(R.id.post);
+        Button datepick=(Button) findViewById(R.id.bdaypick);
 
-        //firebase starts here
+        c=Calendar.getInstance();
+        final DatePickerDialog.OnDateSetListener date =new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
+                c.set(Calendar.YEAR,i);
+                c.set(Calendar.MONTH,i1);
+                c.set(Calendar.DAY_OF_MONTH,i2);
+                updateLabel();
 
+            }
+        };
+        datepick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new DatePickerDialog(addactivity.this,date,c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
+
+
+        //contact picker
+        contact.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i=new Intent(Intent.ACTION_PICK);
+                i.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
+                startActivityForResult(i,SELECT_PHONE_NUMBER);
+            }
+        });
+        //photo picker
         photo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -146,6 +198,13 @@ public class addactivity extends AppCompatActivity {
             }
         });
 
+
+    }
+    private void updateLabel()
+    {
+        String format="dd/MM/yyyy";
+        SimpleDateFormat sd=new SimpleDateFormat(format, Locale.ENGLISH);
+        dobedit.setText(sd.format(c.getTime()));
 
     }
 }

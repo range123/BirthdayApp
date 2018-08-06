@@ -1,11 +1,16 @@
 package com.range.birthdayapp;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -101,11 +106,13 @@ public class first_Activity extends AppCompatActivity {
     final ArrayList<String> dobs = new ArrayList<>();
     final ArrayList<String> urls = new ArrayList<>();
     final ArrayList<String> pids = new ArrayList<>();
+    CustomAdapter customAdapter=null;
 
 
-    void insert(birthdaypost b) throws java.text.ParseException, ArrayIndexOutOfBoundsException {
+
+    void insert(birthdaypost b) throws java.text.ParseException, IndexOutOfBoundsException {
         int i = 0, j;
-        ArrayList<Date> dateobj = new ArrayList<Date>();
+        ArrayList<Date> dateobj = new ArrayList<>();
         for (i = 0; i < dobs.size(); i++)
             dateobj.add(i, new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).parse(dobs.get(i)));
 
@@ -116,10 +123,12 @@ public class first_Activity extends AppCompatActivity {
 
         }
         dobs.add(i, b.getDob());
-
         pids.add(i, b.getPid());
         urls.add(i, b.getPhotourl());
         names.add(i, b.getName());
+        customAdapter.notifyDataSetChanged();
+        //SetAlarm(i,dob);
+
 
 
     }
@@ -148,7 +157,7 @@ public class first_Activity extends AppCompatActivity {
             }
         });
 
-        final CustomAdapter customAdapter = new CustomAdapter(getApplicationContext(), names, dobs, urls);
+        customAdapter = new CustomAdapter(getApplicationContext(), names, dobs, urls);
         list_View.setAdapter(customAdapter);
         FirebaseDatabase.getInstance().getReference("Birthdays").addChildEventListener(new ChildEventListener() {
             @Override
@@ -157,7 +166,7 @@ public class first_Activity extends AppCompatActivity {
                 if (b.getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid()) && dobs.size() < 10) {
                     try {
                         insert(b);
-                        customAdapter.notifyDataSetChanged();
+                        //customAdapter.notifyDataSetChanged();
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
@@ -202,11 +211,11 @@ public class first_Activity extends AppCompatActivity {
                         Toast.makeText(first_Activity.this, "Delete Failed", Toast.LENGTH_SHORT).show();
                     }
                 });
-                names.remove(b.getName());
+                /*names.remove(b.getName());
                 dobs.remove(b.getDob());
                 urls.remove(b.getPhotourl());
                 pids.remove(b.getPid());
-                customAdapter.notifyDataSetChanged();
+                customAdapter.notifyDataSetChanged();*/
 
 
             }
@@ -435,6 +444,42 @@ public class first_Activity extends AppCompatActivity {
             return view;
         }
     }
+    int search(String pid)
+    {
+        for(int i=0;i<pids.size();i++)
+        {
+            if(pids.get(i).equals(pid))
+                return i;
 
+        }
+        return -1;
+    }
+    //Alarm setter
+    public void SetAlarm(int index, Date dob) throws IndexOutOfBoundsException
+    {
+        // final Button button = buttons[2]; // replace with a button from your own UI
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override public void onReceive(Context context, Intent intent )
+            {
+                String pid=intent.getStringExtra("pid");
+                int i=search(pid);
 
+                Toast.makeText(context, "Received : "+names.get(i), Toast.LENGTH_SHORT).show();
+                //button.setBackgroundColor( Color.RED );
+                context.unregisterReceiver( this ); // this == BroadcastReceiver, not Activity
+            }
+        };
+
+        this.registerReceiver( receiver, new IntentFilter("com.blah.blah.somemessage") );
+
+        PendingIntent pintent = PendingIntent.getBroadcast( this, 0, new Intent("com.blah.blah.somemessage").putExtra("pid",pids.get(index)), 0 );
+
+        AlarmManager manager = (AlarmManager)(this.getSystemService( Context.ALARM_SERVICE ));
+
+        // set alarm to fire 5 sec (1000*5) from now (SystemClock.elapsedRealtime())
+        manager.set( AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + dob.getTime()-System.currentTimeMillis()-1000*60*60*2+1000*60*10, pintent );
+    }
 }
+
+
+

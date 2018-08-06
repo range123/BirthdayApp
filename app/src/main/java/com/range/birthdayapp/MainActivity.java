@@ -83,10 +83,24 @@ public class MainActivity extends AppCompatActivity {
             //Users u=new Users(FirebaseAuth.getInstance().getCurrentUser().getDisplayName(),FirebaseAuth.getInstance().getCurrentUser().getUid(),FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber(),FirebaseAuth.getInstance().getCurrentUser().getEmail());
             //df.setValue(u);
             //CALL INTENT
-            Toast.makeText(this, FirebaseAuth.getInstance().getCurrentUser().getEmail(), Toast.LENGTH_SHORT).show();
-            Intent i = new Intent(getApplicationContext(), first_Activity.class);
-            startActivity(i);
-            finish();
+            try {
+                if(isInternetAvailable())
+                {
+                    Toast.makeText(this, "Internet available", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, FirebaseAuth.getInstance().getCurrentUser().getEmail(), Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent(getApplicationContext(), first_Activity.class);
+                    startActivity(i);
+                    finish();
+                }
+                else
+                {
+                    Toast.makeText(this, "Internet not available", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(getApplicationContext(),offlineact.class));
+                }
+            } catch (InterruptedException | IOException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 

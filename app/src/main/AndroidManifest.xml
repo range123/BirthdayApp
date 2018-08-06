@@ -4,6 +4,9 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
+
 
     <application
         android:allowBackup="true"
@@ -22,6 +25,7 @@
         <activity android:name=".first_Activity" />
         <activity android:name=".addactivity" />
         <activity android:name=".offlineact"></activity>
+
     </application>
 
 </manifest>
