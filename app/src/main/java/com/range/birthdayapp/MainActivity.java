@@ -44,11 +44,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        //FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        super.onStart();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        try {
+       /* try {
             if(isInternetAvailable())
             {
                 Toast.makeText(this, "Internet available", Toast.LENGTH_SHORT).show();
@@ -56,11 +62,11 @@ public class MainActivity extends AppCompatActivity {
             else
             {
                 Toast.makeText(this, "Internet not available", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(getApplicationContext(),offlineact.class));
+                //startActivity(new Intent(getApplicationContext(),offlineact.class));
             }
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
-        }
+        }*/
 
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             SignInButton sign_in = (SignInButton) findViewById(R.id.sign_in_button);
@@ -95,7 +101,11 @@ public class MainActivity extends AppCompatActivity {
                 else
                 {
                     Toast.makeText(this, "Internet not available", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(getApplicationContext(),offlineact.class));
+                    //startActivity(new Intent(getApplicationContext(),offlineact.class));
+                    Toast.makeText(this, FirebaseAuth.getInstance().getCurrentUser().getEmail(), Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent(getApplicationContext(), first_Activity.class);
+                    startActivity(i);
+                    finish();
                 }
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();

@@ -1,6 +1,8 @@
 package com.range.birthdayapp;
 
 import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
@@ -48,8 +51,15 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Random;
 
 public class first_Activity extends AppCompatActivity {
+    private String CHANNEL_ID="123";
+     SharedPreferences pref=null;
+     void delpref()
+     {
+         pref.edit().clear().apply();
+     }
 
     DrawerLayout dl;
 
@@ -65,12 +75,20 @@ public class first_Activity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        createNotificationChannel();
+
+    }
+
     /**
      * Handles a click on the menu option to get a place.
      *
      * @param item The menu item to handle.
      * @return Boolean.
      */
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -110,7 +128,7 @@ public class first_Activity extends AppCompatActivity {
 
 
 
-    void insert(birthdaypost b) throws java.text.ParseException, IndexOutOfBoundsException {
+    int  insert(birthdaypost b) throws java.text.ParseException, IndexOutOfBoundsException {
         int i = 0, j;
         ArrayList<Date> dateobj = new ArrayList<>();
         for (i = 0; i < dobs.size(); i++)
@@ -127,10 +145,43 @@ public class first_Activity extends AppCompatActivity {
         urls.add(i, b.getPhotourl());
         names.add(i, b.getName());
         customAdapter.notifyDataSetChanged();
+        return i;
         //SetAlarm(i,dob);
 
 
 
+    }
+
+    void startServ(birthdaypost b,int i) throws java.text.ParseException
+    {
+        int m = (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
+        Random r=new Random();
+        Intent intent = new Intent(getApplicationContext(), SendDataService.class);
+        intent.putExtra("name",b.getName())
+                .putExtra("pid",b.getPid())
+                .putExtra("dob",b.getDob())
+                .putExtra("photo",b.getPhotourl())
+                .putExtra("phn",Long.parseLong(b.getPhone_number()));
+
+        //Log.d("TAG"," "+((int) Long.parseLong(b.getPhone_number())));
+        PendingIntent pintent = PendingIntent.getService(getApplicationContext(), ((int) Long.parseLong(b.getPhone_number())), intent, PendingIntent.FLAG_ONE_SHOT);
+
+        AlarmManager alarm = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        Calendar c=Calendar.getInstance();
+        c.setTimeInMillis(new SimpleDateFormat("dd/MM/yyyy",Locale.ENGLISH).parse(b.getDob()).getTime());
+        c.set(Calendar.YEAR,c.get(Calendar.YEAR));
+        c.set(Calendar.MONTH,c.get(Calendar.MONTH));
+        c.set(Calendar.DAY_OF_MONTH,c.get(Calendar.DAY_OF_MONTH)-1);
+        c.set(Calendar.HOUR_OF_DAY,21);
+        c.set(Calendar.MINUTE,0);
+        c.set(Calendar.SECOND,r.nextInt(61));
+        alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pintent);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putBoolean(b.getPid(),true);
+        editor.putString(b.getName(),b.getPhone_number());
+        editor.apply();
+
+        //Toast.makeText(first_Activity.this, "Service Started", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -138,8 +189,9 @@ public class first_Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first_);
         //Shared preferences for deletion
-        final SharedPreferences pref = getSharedPreferences("myprefs", MODE_PRIVATE);
-        final SharedPreferences.Editor editor = pref.edit();
+        pref = getSharedPreferences("myprefs", MODE_PRIVATE);
+        //delpref();//remove this later
+        AlarmManager alarm = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         final ListView list_View = (ListView) findViewById(R.id.lv);
         dl = findViewById(R.id.drawer_layout);
         NavigationView nv = findViewById(R.id.nav_view);
@@ -151,11 +203,44 @@ public class first_Activity extends AppCompatActivity {
                 if (item.getTitle().equals("Add Birthday")) {
                     startActivity(new Intent(getApplicationContext(), addactivity.class));
                 }
+                if (item.getTitle().equals("Start Service")) {
+
+                    /*Intent sendIntent = new Intent("android.intent.action.MAIN");
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    sendIntent.setPackage("com.whatsapp");
+                    sendIntent.setType("text/plain");
+                    sendIntent.putExtra("jid", "919789068365" + "@s.whatsapp.net");// here 91 is country code
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, "Demo test message");
+                    startActivity(sendIntent);*/
+
+                    try {
+                        String text = "This is a test";// Replace with your message.
+
+                        String toNumber = "919445299298"; // Replace with mobile phone number without +Sign or leading zeros.
+
+
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(Uri.parse("http://api.whatsapp.com/send?phone="+toNumber +"&text="+text));
+                        startActivity(intent);
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+
+                }
+
+                if (item.getTitle().equals("Clear Clutter")) {
+                    delpref();
+                    finish();
+
+                }
 
 
                 return true;
             }
         });
+
 
         customAdapter = new CustomAdapter(getApplicationContext(), names, dobs, urls);
         list_View.setAdapter(customAdapter);
@@ -165,7 +250,12 @@ public class first_Activity extends AppCompatActivity {
                 birthdaypost b = dataSnapshot.getValue(birthdaypost.class);
                 if (b.getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid()) && dobs.size() < 10) {
                     try {
-                        insert(b);
+                        int i=insert(b);
+                        if(!pref.getBoolean(b.getPid(),false))
+                        {
+                            startServ(b,i);
+
+                        }
                         //customAdapter.notifyDataSetChanged();
                     } catch (ParseException e) {
                         e.printStackTrace();
@@ -211,6 +301,19 @@ public class first_Activity extends AppCompatActivity {
                         Toast.makeText(first_Activity.this, "Delete Failed", Toast.LENGTH_SHORT).show();
                     }
                 });
+                SharedPreferences.Editor edit=pref.edit();
+                edit.remove(b.getPid());
+                edit.remove(b.getName());
+                edit.apply();
+                Intent intent = new Intent(getApplicationContext(), SendDataService.class);
+                intent.putExtra("name",b.getName())
+                        .putExtra("pid",b.getPid())
+                        .putExtra("dob",b.getDob())
+                        .putExtra("photo",b.getPhotourl())
+                        .putExtra("phn",Long.parseLong(b.getPhone_number()));
+                PendingIntent pintent=PendingIntent.getService(getApplicationContext(), (int) Long.parseLong(b.getPhone_number()), intent, PendingIntent.FLAG_ONE_SHOT);
+                AlarmManager alarm = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+                alarm.cancel(pintent);
                 /*names.remove(b.getName());
                 dobs.remove(b.getDob());
                 urls.remove(b.getPhotourl());
@@ -277,14 +380,23 @@ public class first_Activity extends AppCompatActivity {
         String c[] = new String[3];
         s = d.split("/");
         c = curr.split("/");
+        Calendar cal=Calendar.getInstance();
+        cal.setTimeInMillis(System.currentTimeMillis());
+
         StringBuilder end = new StringBuilder();
         if (s[1].compareTo(c[1]) < 0) {
-            end.append(s[0] + "/" + s[1] + "/" + "2019");
+            //end.append(s[0] + "/" + s[1] + "/" + "2019");
+            cal.set(Calendar.YEAR,cal.get(Calendar.YEAR)+1);
+            end.append(s[0] + "/" + s[1] + "/" + cal.get(Calendar.YEAR));
 
         } else if (s[1].equals(c[1]) && s[0].compareTo(c[0]) < 0) {
-            end.append(s[0] + "/" + s[1] + "/" + "2019");
+            //end.append(s[0] + "/" + s[1] + "/" + "2019");
+            cal.set(Calendar.YEAR,cal.get(Calendar.YEAR)+1);
+            end.append(s[0] + "/" + s[1] + "/" + cal.get(Calendar.YEAR));
+
         } else {
-            end.append(s[0] + "/" + s[1] + "/" + "2018");
+            //end.append(s[0] + "/" + s[1] + "/" + "2018");
+            end.append(s[0] + "/" + s[1] + "/" + cal.get(Calendar.YEAR));
         }
         return end.toString();
 
@@ -478,6 +590,22 @@ public class first_Activity extends AppCompatActivity {
 
         // set alarm to fire 5 sec (1000*5) from now (SystemClock.elapsedRealtime())
         manager.set( AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + dob.getTime()-System.currentTimeMillis()-1000*60*60*2+1000*60*10, pintent );
+    }
+    //notif channel
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 }
 

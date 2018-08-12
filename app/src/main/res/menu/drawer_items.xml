@@ -8,11 +8,11 @@
         <item
             android:id="@+id/del_birthday"
             android:icon="@drawable/delbirth"
-            android:title="Delete Birthday" />
+            android:title="Start Service" />
 
         <item
             android:id="@+id/show_all_birthdays"
             android:icon="@drawable/showallbirth"
-            android:title="Show All Birthdays" />
+            android:title="Clear Clutter" />
     </group>
 </menu>
