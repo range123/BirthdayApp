@@ -3,16 +3,25 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/add_birthday"
-            android:icon="@drawable/plus"
+            android:icon="@drawable/plusbirth"
             android:title="Add Birthday" />
         <item
             android:id="@+id/del_birthday"
-            android:icon="@drawable/delbirth"
-            android:title="Start Service" />
+            android:icon="@drawable/showallbirth"
+            android:title="Users" />
+        <item
+            android:id="@+id/add_class"
+            android:icon="@mipmap/ic_launcher"
+            android:title="Add To Class" />
+
+        <item
+            android:id="@+id/set_time"
+            android:icon="@drawable/showallbirth"
+            android:title="Change Time" />
 
         <item
             android:id="@+id/show_all_birthdays"
-            android:icon="@drawable/showallbirth"
+            android:icon="@drawable/delbirth"
             android:title="Clear Clutter" />
     </group>
 </menu>

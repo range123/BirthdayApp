@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.TimePickerDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -30,6 +31,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -54,12 +56,12 @@ import java.util.Locale;
 import java.util.Random;
 
 public class first_Activity extends AppCompatActivity {
-    private String CHANNEL_ID="123";
-     SharedPreferences pref=null;
-     void delpref()
-     {
-         pref.edit().clear().apply();
-     }
+    private String CHANNEL_ID = "123";
+    SharedPreferences pref = null;
+
+    void delpref() {
+        pref.edit().clear().apply();
+    }
 
     DrawerLayout dl;
 
@@ -124,11 +126,11 @@ public class first_Activity extends AppCompatActivity {
     final ArrayList<String> dobs = new ArrayList<>();
     final ArrayList<String> urls = new ArrayList<>();
     final ArrayList<String> pids = new ArrayList<>();
-    CustomAdapter customAdapter=null;
+    final ArrayList<String> uids = new ArrayList<>();
+    CustomAdapter customAdapter = null;
 
 
-
-    int  insert(birthdaypost b) throws java.text.ParseException, IndexOutOfBoundsException {
+    int insert(birthdaypost b) throws java.text.ParseException, IndexOutOfBoundsException {
         int i = 0, j;
         ArrayList<Date> dateobj = new ArrayList<>();
         for (i = 0; i < dobs.size(); i++)
@@ -141,6 +143,7 @@ public class first_Activity extends AppCompatActivity {
 
         }
         dobs.add(i, b.getDob());
+        uids.add(i, b.getUid());
         pids.add(i, b.getPid());
         urls.add(i, b.getPhotourl());
         names.add(i, b.getName());
@@ -149,39 +152,68 @@ public class first_Activity extends AppCompatActivity {
         //SetAlarm(i,dob);
 
 
-
+    }
+    void restartApp()
+    {
+        Intent i = getBaseContext().getPackageManager()
+                .getLaunchIntentForPackage( getBaseContext().getPackageName() );
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(i);
+    }
+    int getMin()
+    {
+        SharedPreferences timepref=getSharedPreferences("timing",MODE_PRIVATE);
+        return timepref.getInt("min",0);
+    }
+    int getHour()
+    {
+        SharedPreferences timepref=getSharedPreferences("timing",MODE_PRIVATE);
+        return timepref.getInt("hour",21);
     }
 
-    void startServ(birthdaypost b,int i) throws java.text.ParseException
-    {
+    void startServ(birthdaypost b, int i) throws java.text.ParseException {
         int m = (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
-        Random r=new Random();
+        Random r = new Random();
         Intent intent = new Intent(getApplicationContext(), SendDataService.class);
-        intent.putExtra("name",b.getName())
-                .putExtra("pid",b.getPid())
-                .putExtra("dob",b.getDob())
-                .putExtra("photo",b.getPhotourl())
-                .putExtra("phn",Long.parseLong(b.getPhone_number()));
+        intent.putExtra("name", b.getName())
+                .putExtra("pid", b.getPid())
+                .putExtra("dob", b.getDob())
+                .putExtra("photo", b.getPhotourl())
+                .putExtra("phn", Long.parseLong(b.getPhone_number()));
 
         //Log.d("TAG"," "+((int) Long.parseLong(b.getPhone_number())));
         PendingIntent pintent = PendingIntent.getService(getApplicationContext(), ((int) Long.parseLong(b.getPhone_number())), intent, PendingIntent.FLAG_ONE_SHOT);
 
-        AlarmManager alarm = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        Calendar c=Calendar.getInstance();
-        c.setTimeInMillis(new SimpleDateFormat("dd/MM/yyyy",Locale.ENGLISH).parse(b.getDob()).getTime());
-        c.set(Calendar.YEAR,c.get(Calendar.YEAR));
-        c.set(Calendar.MONTH,c.get(Calendar.MONTH));
-        c.set(Calendar.DAY_OF_MONTH,c.get(Calendar.DAY_OF_MONTH)-1);
-        c.set(Calendar.HOUR_OF_DAY,21);
-        c.set(Calendar.MINUTE,0);
-        c.set(Calendar.SECOND,r.nextInt(61));
+        AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).parse(b.getDob()).getTime());
+        c.set(Calendar.YEAR, c.get(Calendar.YEAR));
+        c.set(Calendar.MONTH, c.get(Calendar.MONTH));
+        c.set(Calendar.DAY_OF_MONTH, c.get(Calendar.DAY_OF_MONTH) - 1);
+        c.set(Calendar.HOUR_OF_DAY, getHour());
+        c.set(Calendar.MINUTE, getMin());
+        c.set(Calendar.SECOND, r.nextInt(61));
         alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pintent);
         SharedPreferences.Editor editor = pref.edit();
-        editor.putBoolean(b.getPid(),true);
-        editor.putString(b.getName(),b.getPhone_number());
+        editor.putBoolean(b.getPid(), true);
+        editor.putString(b.getName(), b.getPhone_number());
         editor.apply();
 
         //Toast.makeText(first_Activity.this, "Service Started", Toast.LENGTH_SHORT).show();
+    }
+
+    public String GetClass() {
+        String mail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        String uname[] = mail.split("@");
+        if (!uname[1].equals("cse.ssn.edu.in"))
+            return null;
+        else {
+            String data = uname[0].replaceAll("[^\\d.]", "");
+            if (data.charAt(2) == '0' && data.charAt(3) <= '6')
+                return "csea";
+        }
+
+        return null;
     }
 
     @Override
@@ -191,7 +223,7 @@ public class first_Activity extends AppCompatActivity {
         //Shared preferences for deletion
         pref = getSharedPreferences("myprefs", MODE_PRIVATE);
         //delpref();//remove this later
-        AlarmManager alarm = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         final ListView list_View = (ListView) findViewById(R.id.lv);
         dl = findViewById(R.id.drawer_layout);
         NavigationView nv = findViewById(R.id.nav_view);
@@ -201,32 +233,59 @@ public class first_Activity extends AppCompatActivity {
                 item.setChecked(true);
                 dl.closeDrawers();
                 if (item.getTitle().equals("Add Birthday")) {
-                    startActivity(new Intent(getApplicationContext(), addactivity.class));
+                    Intent i = new Intent(getApplicationContext(), addactivity.class);
+                    i.putExtra("class", "default");
+                    startActivity(i);
                 }
-                if (item.getTitle().equals("Start Service")) {
-
-                    /*Intent sendIntent = new Intent("android.intent.action.MAIN");
-                    sendIntent.setAction(Intent.ACTION_SEND);
-                    sendIntent.setPackage("com.whatsapp");
-                    sendIntent.setType("text/plain");
-                    sendIntent.putExtra("jid", "919789068365" + "@s.whatsapp.net");// here 91 is country code
-                    sendIntent.putExtra(Intent.EXTRA_TEXT, "Demo test message");
-                    startActivity(sendIntent);*/
-
-                    try {
-                        String text = "This is a test";// Replace with your message.
-
-                        String toNumber = "919445299298"; // Replace with mobile phone number without +Sign or leading zeros.
+                if (item.getTitle().equals("Users")) {
+                    Intent intent = new Intent(getApplicationContext(), Useractivity.class);
+                    startActivity(intent);
 
 
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setData(Uri.parse("http://api.whatsapp.com/send?phone="+toNumber +"&text="+text));
-                        startActivity(intent);
+                }
+                if (item.getTitle().equals("Add To Class")) {
+                    if (!FirebaseAuth.getInstance().getCurrentUser().getEmail().equals("jayaraman17064@cse.ssn.edu.in")) {
+                        AlertDialog.Builder b = new AlertDialog.Builder(first_Activity.this, R.style.Theme_AppCompat_DayNight_Dialog_Alert);
+                        b.setCancelable(true);
+                        b.setTitle("Permission Denied").setMessage("You Dont Have The Permissions To Alter The Class's Data").setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                dialog.cancel();
+                            }
+                        });
+                        b.show();
+                    } else {
+
+                        Intent i = new Intent(getApplicationContext(), addactivity.class);
+                        if (GetClass() == null)
+                            Toast.makeText(first_Activity.this, "Class Not Yet Added", Toast.LENGTH_SHORT).show();
+                        else {
+                            i.putExtra("class", GetClass());
+                            startActivity(i);
+                        }
                     }
-                    catch (Exception e){
-                        e.printStackTrace();
-                    }
 
+
+                }
+                if (item.getTitle().equals("Change Time")) {
+                    //Toast.makeText(first_Activity.this, "Restart The App", Toast.LENGTH_SHORT).show();
+                    TimePickerDialog mTimePicker;
+                    mTimePicker = new TimePickerDialog(first_Activity.this, new TimePickerDialog.OnTimeSetListener() {
+                        @Override
+                        public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                            SharedPreferences timepref=getSharedPreferences("timing",MODE_PRIVATE);
+                            SharedPreferences.Editor edit=timepref.edit();
+                            edit.putInt("hour",timePicker.getHour());
+                            edit.putInt("min",timePicker.getMinute());
+                            edit.apply();
+                            Toast.makeText(first_Activity.this, "Notification time changed", Toast.LENGTH_SHORT).show();
+                            delpref();
+                            restartApp();
+                        }
+                    }, getHour(), getMin(), true);//Yes 24 hour time
+                    mTimePicker.setTitle("Select Time");
+                    mTimePicker.show();
 
                 }
 
@@ -247,13 +306,12 @@ public class first_Activity extends AppCompatActivity {
         FirebaseDatabase.getInstance().getReference("Birthdays").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                birthdaypost b = dataSnapshot.getValue(birthdaypost.class);
-                if (b.getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid()) && dobs.size() < 10) {
+                birthdaypost b = dataSnapshot.getValue(birthdaypost.class); //b.getUid().equals(GetClass()))
+                if ((b.getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid()) || b.getUid().equals(GetClass()))) {//change the limit?
                     try {
-                        int i=insert(b);
-                        if(!pref.getBoolean(b.getPid(),false))
-                        {
-                            startServ(b,i);
+                        int i = insert(b);
+                        if (!pref.getBoolean(b.getPid(), false)) {
+                            startServ(b, i);
 
                         }
                         //customAdapter.notifyDataSetChanged();
@@ -286,33 +344,37 @@ public class first_Activity extends AppCompatActivity {
                 dobs.remove(b.getDob());
                 urls.remove(b.getPhotourl());
                 pids.remove(b.getPid());
+                uids.remove(b.getUid());
                 customAdapter.notifyDataSetChanged();
-                FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
-                StorageReference storageReference = firebaseStorage.getReferenceFromUrl("gs://birthdayapp-34806.appspot.com");
-                StorageReference ref = storageReference.child(FirebaseAuth.getInstance().getCurrentUser().getDisplayName() + "/" + b.getName() + ".jpeg");
-                ref.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        Toast.makeText(first_Activity.this, "Deleted Successfully", Toast.LENGTH_SHORT).show();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(first_Activity.this, "Delete Failed", Toast.LENGTH_SHORT).show();
-                    }
-                });
-                SharedPreferences.Editor edit=pref.edit();
+                String def = "https://firebasestorage.googleapis.com/v0/b/birthdayapp-34806.appspot.com/o/default%2Fdefaultpic.png?alt=media&token=cf644d60-48e8-43bb-b90a-e79cd2021499";
+                if (!(b.getPhotourl().equals(def))) {
+                    FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
+                    StorageReference storageReference = firebaseStorage.getReferenceFromUrl("gs://birthdayapp-34806.appspot.com");
+                    StorageReference ref = storageReference.child(FirebaseAuth.getInstance().getCurrentUser().getDisplayName() + "/" + b.getName() + ".jpeg");
+                    ref.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            Toast.makeText(first_Activity.this, "Deleted Successfully", Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(first_Activity.this, "Delete Failed", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+                SharedPreferences.Editor edit = pref.edit();
                 edit.remove(b.getPid());
                 edit.remove(b.getName());
                 edit.apply();
                 Intent intent = new Intent(getApplicationContext(), SendDataService.class);
-                intent.putExtra("name",b.getName())
-                        .putExtra("pid",b.getPid())
-                        .putExtra("dob",b.getDob())
-                        .putExtra("photo",b.getPhotourl())
-                        .putExtra("phn",Long.parseLong(b.getPhone_number()));
-                PendingIntent pintent=PendingIntent.getService(getApplicationContext(), (int) Long.parseLong(b.getPhone_number()), intent, PendingIntent.FLAG_ONE_SHOT);
-                AlarmManager alarm = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+                intent.putExtra("name", b.getName())
+                        .putExtra("pid", b.getPid())
+                        .putExtra("dob", b.getDob())
+                        .putExtra("photo", b.getPhotourl())
+                        .putExtra("phn", Long.parseLong(b.getPhone_number()));
+                PendingIntent pintent = PendingIntent.getService(getApplicationContext(), (int) Long.parseLong(b.getPhone_number()), intent, PendingIntent.FLAG_ONE_SHOT);
+                AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
                 alarm.cancel(pintent);
                 /*names.remove(b.getName());
                 dobs.remove(b.getDob());
@@ -340,34 +402,47 @@ public class first_Activity extends AppCompatActivity {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 final int pos = i;
-                AlertDialog.Builder builder = new AlertDialog.Builder(first_Activity.this, R.style.Theme_AppCompat_DayNight_Dialog_Alert);
-                builder.setCancelable(true);
-                builder.setTitle("DELETE BIRTHDAY").setMessage("Are You Sure You Want To Delete This Birthday?").setPositiveButton("yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        String pid = pids.get(pos);
-                        FirebaseDatabase.getInstance().getReference("Birthdays").child(pid).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                Toast.makeText(first_Activity.this, "Delete Complete", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                        dialogInterface.cancel();
+                if ((uids.get(i).equals("csea") && FirebaseAuth.getInstance().getCurrentUser().getEmail().equals("jayaraman17064@cse.ssn.edu.in")) || uids.get(i).equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(first_Activity.this, R.style.Theme_AppCompat_DayNight_Dialog_Alert);
+                    builder.setCancelable(true);
+                    builder.setTitle("DELETE BIRTHDAY").setMessage("Are You Sure You Want To Delete This Birthday?").setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            String pid = pids.get(pos);
+                            FirebaseDatabase.getInstance().getReference("Birthdays").child(pid).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    Toast.makeText(first_Activity.this, "Delete Complete", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            dialogInterface.cancel();
 
 
-                    }
-                })
-                        .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                Toast.makeText(first_Activity.this, "Cancelled", Toast.LENGTH_SHORT).show();
-                                dialogInterface.cancel();
+                        }
+                    })
+                            .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    Toast.makeText(first_Activity.this, "Cancelled", Toast.LENGTH_SHORT).show();
+                                    dialogInterface.cancel();
 
 
-                            }
-                        });
-                AlertDialog a = builder.create();
-                a.show();
+                                }
+                            });
+                    AlertDialog a = builder.create();
+                    a.show();
+                } else {
+                    AlertDialog.Builder b = new AlertDialog.Builder(first_Activity.this, R.style.Theme_AppCompat_DayNight_Dialog_Alert);
+                    b.setCancelable(true);
+                    b.setTitle("Permission Denied").setMessage("You Dont Have The Permissions To Alter The Class's Data").setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            dialog.cancel();
+                        }
+                    });
+                    b.show();
+                }
                 return true;
             }
         });
@@ -380,18 +455,18 @@ public class first_Activity extends AppCompatActivity {
         String c[] = new String[3];
         s = d.split("/");
         c = curr.split("/");
-        Calendar cal=Calendar.getInstance();
+        Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(System.currentTimeMillis());
 
         StringBuilder end = new StringBuilder();
         if (s[1].compareTo(c[1]) < 0) {
             //end.append(s[0] + "/" + s[1] + "/" + "2019");
-            cal.set(Calendar.YEAR,cal.get(Calendar.YEAR)+1);
+            cal.set(Calendar.YEAR, cal.get(Calendar.YEAR) + 1);
             end.append(s[0] + "/" + s[1] + "/" + cal.get(Calendar.YEAR));
 
         } else if (s[1].equals(c[1]) && s[0].compareTo(c[0]) < 0) {
             //end.append(s[0] + "/" + s[1] + "/" + "2019");
-            cal.set(Calendar.YEAR,cal.get(Calendar.YEAR)+1);
+            cal.set(Calendar.YEAR, cal.get(Calendar.YEAR) + 1);
             end.append(s[0] + "/" + s[1] + "/" + cal.get(Calendar.YEAR));
 
         } else {
@@ -556,41 +631,41 @@ public class first_Activity extends AppCompatActivity {
             return view;
         }
     }
-    int search(String pid)
-    {
-        for(int i=0;i<pids.size();i++)
-        {
-            if(pids.get(i).equals(pid))
+
+    int search(String pid) {
+        for (int i = 0; i < pids.size(); i++) {
+            if (pids.get(i).equals(pid))
                 return i;
 
         }
         return -1;
     }
+
     //Alarm setter
-    public void SetAlarm(int index, Date dob) throws IndexOutOfBoundsException
-    {
+    public void SetAlarm(int index, Date dob) throws IndexOutOfBoundsException {
         // final Button button = buttons[2]; // replace with a button from your own UI
         BroadcastReceiver receiver = new BroadcastReceiver() {
-            @Override public void onReceive(Context context, Intent intent )
-            {
-                String pid=intent.getStringExtra("pid");
-                int i=search(pid);
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String pid = intent.getStringExtra("pid");
+                int i = search(pid);
 
-                Toast.makeText(context, "Received : "+names.get(i), Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Received : " + names.get(i), Toast.LENGTH_SHORT).show();
                 //button.setBackgroundColor( Color.RED );
-                context.unregisterReceiver( this ); // this == BroadcastReceiver, not Activity
+                context.unregisterReceiver(this); // this == BroadcastReceiver, not Activity
             }
         };
 
-        this.registerReceiver( receiver, new IntentFilter("com.blah.blah.somemessage") );
+        this.registerReceiver(receiver, new IntentFilter("com.blah.blah.somemessage"));
 
-        PendingIntent pintent = PendingIntent.getBroadcast( this, 0, new Intent("com.blah.blah.somemessage").putExtra("pid",pids.get(index)), 0 );
+        PendingIntent pintent = PendingIntent.getBroadcast(this, 0, new Intent("com.blah.blah.somemessage").putExtra("pid", pids.get(index)), 0);
 
-        AlarmManager manager = (AlarmManager)(this.getSystemService( Context.ALARM_SERVICE ));
+        AlarmManager manager = (AlarmManager) (this.getSystemService(Context.ALARM_SERVICE));
 
         // set alarm to fire 5 sec (1000*5) from now (SystemClock.elapsedRealtime())
-        manager.set( AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + dob.getTime()-System.currentTimeMillis()-1000*60*60*2+1000*60*10, pintent );
+        manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + dob.getTime() - System.currentTimeMillis() - 1000 * 60 * 60 * 2 + 1000 * 60 * 10, pintent);
     }
+
     //notif channel
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because

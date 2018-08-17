@@ -38,35 +38,34 @@ public class addactivity extends AppCompatActivity {
     StorageReference storageReference;
     TextView url;
     String download;
-    int SELECT_PHONE_NUMBER=5;
-    EditText phnedit =null;
+    int SELECT_PHONE_NUMBER = 5;
+    EditText phnedit = null;
 
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (resultCode == RESULT_OK) {
-            if(requestCode==SELECT_PHONE_NUMBER)
-            {
-                Uri contacturi=data.getData();
+            if (requestCode == SELECT_PHONE_NUMBER) {
+                Uri contacturi = data.getData();
                 String[] projection = new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER};
-                Cursor cursor=getApplicationContext().getContentResolver().query(contacturi,projection,null,null,null);
-                if(cursor !=null && cursor.moveToFirst()){
-                    int numberindex=cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-                    String number=cursor.getString(numberindex);
-                    phnedit.setText(number.replaceAll("\\s+",""));
+                Cursor cursor = getApplicationContext().getContentResolver().query(contacturi, projection, null, null, null);
+                if (cursor != null && cursor.moveToFirst()) {
+                    int numberindex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                    String number = cursor.getString(numberindex);
+                    phnedit.setText(number.replaceAll("\\s+", ""));
                 }
             }
 
             if (requestCode == 1) {
-                EditText nameedit=(EditText)findViewById(R.id.name);
+                EditText nameedit = (EditText) findViewById(R.id.name);
 
                 // currImageURI is the global variable I'm using to hold the content:// URI of the image
                 currImageURI = data.getData();
                 pic.setImageURI(currImageURI);
                 firebaseStorage = FirebaseStorage.getInstance();
                 storageReference = firebaseStorage.getReferenceFromUrl("gs://birthdayapp-34806.appspot.com");
-                final StorageReference ref = storageReference.child(FirebaseAuth.getInstance().getCurrentUser().getDisplayName() + "/" + nameedit.getText().toString()+".jpeg");
+                final StorageReference ref = storageReference.child(FirebaseAuth.getInstance().getCurrentUser().getDisplayName() + "/" + nameedit.getText().toString() + ".jpeg");
                 final UploadTask uploadTask = ref.putFile(currImageURI);
                 uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                     @Override
@@ -111,27 +110,29 @@ public class addactivity extends AppCompatActivity {
 
     Calendar c = null;
     EditText dobedit = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_addactivity);
         final EditText nameedit = (EditText) findViewById(R.id.name);
         dobedit = (EditText) findViewById(R.id.dob);
-        final Button contact=(Button) findViewById(R.id.contactpick);
+        final Button contact = (Button) findViewById(R.id.contactpick);
         url = (TextView) findViewById(R.id.url);
         pic = (ImageView) findViewById(R.id.imgview);
-        phnedit =(EditText) findViewById(R.id.phone);
+        phnedit = (EditText) findViewById(R.id.phone);
         Button photo = (Button) findViewById(R.id.photobut);
         Button post = (Button) findViewById(R.id.post);
-        Button datepick=(Button) findViewById(R.id.bdaypick);
+        Button datepick = (Button) findViewById(R.id.bdaypick);
+        final Intent i=getIntent();
 
-        c=Calendar.getInstance();
-        final DatePickerDialog.OnDateSetListener date =new DatePickerDialog.OnDateSetListener() {
+        c = Calendar.getInstance();
+        final DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
-                c.set(Calendar.YEAR,i);
-                c.set(Calendar.MONTH,i1);
-                c.set(Calendar.DAY_OF_MONTH,i2);
+                c.set(Calendar.YEAR, i);
+                c.set(Calendar.MONTH, i1);
+                c.set(Calendar.DAY_OF_MONTH, i2);
                 updateLabel();
 
             }
@@ -139,7 +140,7 @@ public class addactivity extends AppCompatActivity {
         datepick.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new DatePickerDialog(addactivity.this,date,c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH)).show();
+                new DatePickerDialog(addactivity.this, date, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)).show();
             }
         });
 
@@ -148,9 +149,9 @@ public class addactivity extends AppCompatActivity {
         contact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i=new Intent(Intent.ACTION_PICK);
+                Intent i = new Intent(Intent.ACTION_PICK);
                 i.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
-                startActivityForResult(i,SELECT_PHONE_NUMBER);
+                startActivityForResult(i, SELECT_PHONE_NUMBER);
             }
         });
         //photo picker
@@ -165,18 +166,43 @@ public class addactivity extends AppCompatActivity {
             }
         });
 
-        final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        //final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         final String downloaduri = download;
+        final String r=i.getStringExtra("class");
+
+
         post.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 final String name = nameedit.getText().toString();
                 final String dob = dobedit.getText().toString();
                 final String phone = phnedit.getText().toString();
-                final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
                 final String downloaduri = download;
-                if (!url.getText().toString().equals("URI available"))
-                    Toast.makeText(addactivity.this, "Wait till picture is uploaded or check your connection and retry", Toast.LENGTH_SHORT).show();
+                String uid = null;
+                if(!r.equals("default"))
+                    uid=r;
+                else
+                    uid=FirebaseAuth.getInstance().getCurrentUser().getUid();
+                if (!url.getText().toString().equals("URI available")) {
+                    String def="https://firebasestorage.googleapis.com/v0/b/birthdayapp-34806.appspot.com/o/default%2Fdefaultpic.png?alt=media&token=cf644d60-48e8-43bb-b90a-e79cd2021499";
+                    DatabaseReference df = FirebaseDatabase.getInstance().getReference("Birthdays");
+                    String pid = df.push().getKey();
+                    birthdaypost b = new birthdaypost(name, dob, phone, def, uid, pid);
+                    df.child(pid).setValue(b).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            Toast.makeText(addactivity.this, "Birthday Added", Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(addactivity.this, "Task Failed", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    finish();
+                    // Toast.makeText(addactivity.this, "Wait till picture is uploaded or check your connection and retry", Toast.LENGTH_SHORT).show();
+                }
                 else {
                     DatabaseReference df = FirebaseDatabase.getInstance().getReference("Birthdays");
                     String pid = df.push().getKey();
@@ -200,10 +226,10 @@ public class addactivity extends AppCompatActivity {
 
 
     }
-    private void updateLabel()
-    {
-        String format="dd/MM/yyyy";
-        SimpleDateFormat sd=new SimpleDateFormat(format, Locale.ENGLISH);
+
+    private void updateLabel() {
+        String format = "dd/MM/yyyy";
+        SimpleDateFormat sd = new SimpleDateFormat(format, Locale.ENGLISH);
         dobedit.setText(sd.format(c.getTime()));
 
     }
