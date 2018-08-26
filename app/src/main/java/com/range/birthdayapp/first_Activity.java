@@ -81,6 +81,13 @@ public class first_Activity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         createNotificationChannel();
+        Intent i =getIntent();
+        if(i.getBooleanExtra("reboot",false))
+        {
+            delpref();
+            restartApp();
+
+        }
 
     }
 
