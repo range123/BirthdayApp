@@ -291,7 +291,8 @@ public class first_Activity extends AppCompatActivity {
 
                 if (item.getTitle().equals("Clear Clutter")) {
                     delpref();
-                    finish();
+                    //finish();
+                    restartApp();
 
                 }
 

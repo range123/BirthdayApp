@@ -91,7 +91,7 @@ public class SendDataService extends Service {
                     NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
                             .setContentTitle("Birthday")
                             .setStyle(new NotificationCompat.BigTextStyle().bigText(intent.getStringExtra("name") + "'s Birthday is in "+(24-timepref.getInt("hour",21))+" Hours. " + "Be The First To Wish Them"))
-                            .setSmallIcon(R.mipmap.iconroundbirth)
+                            .setSmallIcon(R.drawable.notificon)
                             .setContentIntent(pwintent)
                             .setAutoCancel(true);
 

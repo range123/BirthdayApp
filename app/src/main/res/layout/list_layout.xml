@@ -23,6 +23,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginTop="29dp"
         android:text="Jayarama Krishnan"
+        android:textColor="@color/black"
         android:textAlignment="center"
         android:textSize="24sp"
         android:textStyle="bold" />
@@ -34,6 +35,7 @@
         android:layout_alignParentEnd="true"
         android:layout_below="@+id/name"
         android:text="13th August"
+        android:textColor="@color/black"
         android:textAlignment="center"
         android:textSize="24sp"
         android:textStyle="bold" />

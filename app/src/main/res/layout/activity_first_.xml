@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background"
     tools:context=".first_Activity">
 
     <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -11,6 +12,7 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <!--android:fitsSystemWindows="true"-->
     <!-- tools:layout_editor_absoluteX="276dp"-->
     <!--tools:layout_editor_absoluteY="0dp"-->
@@ -21,6 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Upcoming Birthdays"
+            android:textColor="@color/black"
             android:textAlignment="center"
             android:textSize="36sp"
             android:textStyle="bold"
@@ -55,8 +58,10 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="start"
+            android:background="@drawable/navigationback"
             android:fitsSystemWindows="true"
-            app:menu="@menu/drawer_items" />
+            app:menu="@menu/drawer_items"
+            app:itemIconTint="@color/black"/>
 
 
     </android.support.v4.widget.DrawerLayout>

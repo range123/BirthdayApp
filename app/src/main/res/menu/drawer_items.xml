@@ -3,7 +3,7 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/add_birthday"
-            android:icon="@drawable/plusbirth"
+            android:icon="@drawable/add"
             android:title="Add Birthday" />
         <item
             android:id="@+id/del_birthday"
@@ -11,12 +11,12 @@
             android:title="Users" />
         <item
             android:id="@+id/add_class"
-            android:icon="@mipmap/ic_launcher"
+            android:icon="@drawable/classbirth"
             android:title="Add To Class" />
 
         <item
             android:id="@+id/set_time"
-            android:icon="@drawable/showallbirth"
+            android:icon="@drawable/timeicon"
             android:title="Change Time" />
 
         <item

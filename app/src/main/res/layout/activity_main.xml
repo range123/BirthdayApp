@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/backgroundmain"
     tools:context=".MainActivity">
     <com.google.android.gms.common.SignInButton
         android:id="@+id/sign_in_button"
@@ -28,6 +29,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="Use SSN Mail For Extra Features"
+        android:textColor="@color/black"
         android:textAlignment="center"
         android:textSize="26sp"
         android:textStyle="bold"
