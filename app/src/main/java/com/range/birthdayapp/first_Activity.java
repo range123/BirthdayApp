@@ -5,16 +5,13 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -156,7 +153,6 @@ public class first_Activity extends AppCompatActivity {
         names.add(i, b.getName());
         customAdapter.notifyDataSetChanged();
         return i;
-        //SetAlarm(i,dob);
 
 
     }
@@ -188,7 +184,6 @@ public class first_Activity extends AppCompatActivity {
                 .putExtra("photo", b.getPhotourl())
                 .putExtra("phn", Long.parseLong(b.getPhone_number()));
 
-        //Log.d("TAG"," "+((int) Long.parseLong(b.getPhone_number())));
         PendingIntent pintent = PendingIntent.getService(getApplicationContext(), ((int) Long.parseLong(b.getPhone_number())), intent, PendingIntent.FLAG_ONE_SHOT);
 
         AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
@@ -206,7 +201,6 @@ public class first_Activity extends AppCompatActivity {
         editor.putString(b.getName(), b.getPhone_number());
         editor.apply();
 
-        //Toast.makeText(first_Activity.this, "Service Started", Toast.LENGTH_SHORT).show();
     }
 
     public String GetClass() {
@@ -276,7 +270,6 @@ public class first_Activity extends AppCompatActivity {
 
                 }
                 if (item.getTitle().equals("Change Time")) {
-                    //Toast.makeText(first_Activity.this, "Restart The App", Toast.LENGTH_SHORT).show();
                     TimePickerDialog mTimePicker;
                     mTimePicker = new TimePickerDialog(first_Activity.this, new TimePickerDialog.OnTimeSetListener() {
                         @Override
@@ -298,7 +291,6 @@ public class first_Activity extends AppCompatActivity {
 
                 if (item.getTitle().equals("Clear Clutter")) {
                     delpref();
-                    //finish();
                     restartApp();
 
                 }
@@ -322,19 +314,9 @@ public class first_Activity extends AppCompatActivity {
                             startServ(b, i);
 
                         }
-                        //customAdapter.notifyDataSetChanged();
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
-                   /* names.add(b.getName());
-                    dobs.add(b.getDob());
-                    urls.add(b.getPhotourl());
-                    pids.add(b.getPid());
-
-                    // if(!(names.size()<=1)) {
-
-                    //}
-                    customAdapter.notifyDataSetChanged();*/
 
                 }
             }
@@ -347,7 +329,6 @@ public class first_Activity extends AppCompatActivity {
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
                 birthdaypost b = dataSnapshot.getValue(birthdaypost.class);
-                //String name=b.getName();
                 names.remove(b.getName());
                 dobs.remove(b.getDob());
                 urls.remove(b.getPhotourl());
@@ -384,11 +365,6 @@ public class first_Activity extends AppCompatActivity {
                 PendingIntent pintent = PendingIntent.getService(getApplicationContext(), (int) Long.parseLong(b.getPhone_number()), intent, PendingIntent.FLAG_ONE_SHOT);
                 AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
                 alarm.cancel(pintent);
-                /*names.remove(b.getName());
-                dobs.remove(b.getDob());
-                urls.remove(b.getPhotourl());
-                pids.remove(b.getPid());
-                customAdapter.notifyDataSetChanged();*/
 
 
             }
@@ -468,17 +444,14 @@ public class first_Activity extends AppCompatActivity {
 
         StringBuilder end = new StringBuilder();
         if (s[1].compareTo(c[1]) < 0) {
-            //end.append(s[0] + "/" + s[1] + "/" + "2019");
             cal.set(Calendar.YEAR, cal.get(Calendar.YEAR) + 1);
             end.append(s[0] + "/" + s[1] + "/" + cal.get(Calendar.YEAR));
 
         } else if (s[1].equals(c[1]) && s[0].compareTo(c[0]) < 0) {
-            //end.append(s[0] + "/" + s[1] + "/" + "2019");
             cal.set(Calendar.YEAR, cal.get(Calendar.YEAR) + 1);
             end.append(s[0] + "/" + s[1] + "/" + cal.get(Calendar.YEAR));
 
         } else {
-            //end.append(s[0] + "/" + s[1] + "/" + "2018");
             end.append(s[0] + "/" + s[1] + "/" + cal.get(Calendar.YEAR));
         }
         return end.toString();
@@ -490,110 +463,14 @@ public class first_Activity extends AppCompatActivity {
         String curr = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).format(Calendar.getInstance().getTime());
         Date current = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).parse(curr);
         Date da = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).parse(d);
-        //String s[]=new String[3];
-
         String dafinal = convert(d, curr);
-        //else
-        //dafinal=da.toString()+"/2018";
         Log.d("TAG", "dafinal = " + dafinal);
         return dafinal;
 
 
     }
 
-   /* public void sort(ArrayList<String> names, ArrayList<String> dobs, ArrayList<String> urls, ArrayList<String> pids) throws Exception {
-        int i = 0, j = 0;
-        String t1, t2, t3, t4;
-        ArrayList<Date> dateobj = new ArrayList<Date>();
-        for (i = 0; i < dobs.size(); i++)
-            dateobj.set(i, new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).parse(dobs.get(i)));
-        for (i = 0; i < dateobj.size(); i++) {
-            for (j = 0; j < dateobj.size() - i - 1; j++) {
-                if (dateobj.get(j + 1).before(dateobj.get(j))) {
-                    t1 = dobs.get(j);
-                    dobs.set(j, dobs.get(j + 1));
-                    dobs.set(j + 1, t1);
 
-                    t2 = names.get(j);
-                    names.set(j, names.get(j + 1));
-                    names.set(j + 1, t2);
-
-                    t3 = urls.get(j);
-                    urls.set(j, urls.get(j + 1));
-                    urls.set(j + 1, t3);
-
-                    t4 = pids.get(j);
-                    pids.set(j, pids.get(j + 1));
-                    pids.set(j + 1, t4);
-                }
-            }
-        }
-    }*/
-
-  /*public void sort(ArrayList<String> names,ArrayList<String> dobs,ArrayList<String> urls)
-    {
-        int i=0,j=0;
-        String temp,temp1,temp2;
-        for(i=0;i<names.size();i++)
-        {
-            for(j=0;j<names.size()-i-1;j++)
-            {
-                String jth=dobs.get(j);
-                String j1th=dobs.get(j+1);
-                String check[]=new String[3];
-                check=dobs.get(j).split("/");
-                String s[]=new String[3];
-                s[0]=check[0];
-                s[1]=check[1];
-                if(isBeforecurrent(jth)) {
-                    s[2] = "2019";
-                }
-                else
-                    s[2]="2018";
-                String nj= new String(s[0].toString()+"/"+s[1].toString()+"/"+s[2].toString());
-                String check1[]=new String[3];
-                check1=dobs.get(j+1).split("/");
-                String s1[]=new String[3];
-                s1[0]=check1[0];
-                s1[1]=check1[1];
-                if(isBeforecurrent(j1th)) {
-                    s1[2] = "2019";
-                }
-                else
-                    s1[2]="2018";
-                String nj1= new String(s[0].toString()+"/"+s[1].toString()+"/"+s[2].toString());
-                Date d1= null;
-                try {
-                    d1 = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).parse(nj);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                Date d2= null;
-                try {
-                    d2 = new SimpleDateFormat("dd/MM/yyyy",Locale.ENGLISH).parse(nj1);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                String tempn,tempd,tempu;
-                Log.d("TAG", "d1 = " +d1+" d2 = "+d2);
-                if(d2.before(d1))
-                {
-                    //Log.d("TAG", "d1 = " +d1+" d2 = "+d2);
-                    tempn=names.get(j);
-                    names.set(j,names.get(j+1));
-                    names.set(j+1,tempn);
-                    tempd=dobs.get(j);
-                    dobs.set(j,dobs.get(j+1));
-                    dobs.set(j+1,tempd);
-
-                    tempu=urls.get(j);
-                    urls.set(j,urls.get(j+1));
-                    urls.set(j+1,tempu);
-
-                }
-            }
-        }
-    }*/
 
 
     class CustomAdapter extends BaseAdapter {
@@ -627,52 +504,17 @@ public class first_Activity extends AppCompatActivity {
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
             view = getLayoutInflater().inflate(R.layout.list_layout, null);
-            //sort(names,dobs,urls);
             ImageView imageView = (ImageView) view.findViewById(R.id.imageView);
             TextView name = (TextView) view.findViewById(R.id.name);
             TextView dob = (TextView) view.findViewById(R.id.birthday);
-            //imageView.setImageResource(image[i]);
             name.setText(names.get(i));
             dob.setText(dobs.get(i));
             Glide.with(getApplicationContext()).load(Uri.parse(urls.get(i))).into(imageView);
-            //dob.setText(dob[i]);
             return view;
         }
     }
 
-    int search(String pid) {
-        for (int i = 0; i < pids.size(); i++) {
-            if (pids.get(i).equals(pid))
-                return i;
 
-        }
-        return -1;
-    }
-
-    //Alarm setter
-    public void SetAlarm(int index, Date dob) throws IndexOutOfBoundsException {
-        // final Button button = buttons[2]; // replace with a button from your own UI
-        BroadcastReceiver receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String pid = intent.getStringExtra("pid");
-                int i = search(pid);
-
-                Toast.makeText(context, "Received : " + names.get(i), Toast.LENGTH_SHORT).show();
-                //button.setBackgroundColor( Color.RED );
-                context.unregisterReceiver(this); // this == BroadcastReceiver, not Activity
-            }
-        };
-
-        this.registerReceiver(receiver, new IntentFilter("com.blah.blah.somemessage"));
-
-        PendingIntent pintent = PendingIntent.getBroadcast(this, 0, new Intent("com.blah.blah.somemessage").putExtra("pid", pids.get(index)), 0);
-
-        AlarmManager manager = (AlarmManager) (this.getSystemService(Context.ALARM_SERVICE));
-
-        // set alarm to fire 5 sec (1000*5) from now (SystemClock.elapsedRealtime())
-        manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + dob.getTime() - System.currentTimeMillis() - 1000 * 60 * 60 * 2 + 1000 * 60 * 10, pintent);
-    }
 
     //notif channel
     private void createNotificationChannel() {

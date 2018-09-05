@@ -166,7 +166,6 @@ public class addactivity extends AppCompatActivity {
             }
         });
 
-        //final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         final String downloaduri = download;
         final String r=i.getStringExtra("class");
 
@@ -201,7 +200,6 @@ public class addactivity extends AppCompatActivity {
                         }
                     });
                     finish();
-                    // Toast.makeText(addactivity.this, "Wait till picture is uploaded or check your connection and retry", Toast.LENGTH_SHORT).show();
                 }
                 else {
                     DatabaseReference df = FirebaseDatabase.getInstance().getReference("Birthdays");

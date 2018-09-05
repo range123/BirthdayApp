@@ -25,7 +25,6 @@ public class BootCompletedIntentReceiver extends BroadcastReceiver {
                     .setOngoing(true);
             Toast.makeText(context, "Serivce started", Toast.LENGTH_SHORT).show();
             NotificationManagerCompat nm = NotificationManagerCompat.from(context);
-            //Toast.makeText(SendDataService.this, "hello "+intent.getLongExtra("phn",0), Toast.LENGTH_SHORT).show();
             nm.notify(21, mBuilder.build());
         }
     }

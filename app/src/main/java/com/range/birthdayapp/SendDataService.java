@@ -48,11 +48,7 @@ public class SendDataService extends Service {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                //  if(intent.getIntExtra("key",0)==1)
-                // Toast.makeText(SendDataService.this, "70 seconds elapsed", Toast.LENGTH_SHORT).show();
-                // else if(intent.getIntExtra("key",0)==2){
 
-                //Toast.makeText(SendDataService.this, "100 seconds elapsed,data = "+intent.getIntExtra("key",-1), Toast.LENGTH_SHORT).show();
 
 
                 if (intent != null) {
@@ -79,7 +75,6 @@ public class SendDataService extends Service {
                         Intent wintent = new Intent(Intent.ACTION_VIEW);
                         wintent.setData(Uri.parse("http://api.whatsapp.com/send?phone="+toNumber +"&text="+text));
                         pwintent=PendingIntent.getActivity(getApplicationContext(),0,wintent,0);
-                        //startActivity(wintent);
                     }
                     catch (Exception e){
                         e.printStackTrace();
@@ -95,21 +90,11 @@ public class SendDataService extends Service {
                             .setContentIntent(pwintent)
                             .setAutoCancel(true);
 
-                    // mBuilder.setOngoing(true);
-
-                    //mBuilder.build();
 
                     int m = (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
                     NotificationManagerCompat nm = NotificationManagerCompat.from(getApplicationContext());
-                    //Toast.makeText(SendDataService.this, "hello "+intent.getLongExtra("phn",0), Toast.LENGTH_SHORT).show();
                     nm.notify(m, mBuilder.build());
-                /*PendingIntent pintent=PendingIntent.getService(getApplicationContext(),intent.getIntExtra("rand",0), intent, PendingIntent.FLAG_ONE_SHOT);
-                AlarmManager alarm = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-                alarm.cancel(pintent);*/
-                    //AlarmManager alarm = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-                    //PendingIntent pintent = PendingIntent.getService(getApplicationContext(), 0, intent, 0);
-                    //alarm.cancel(pintent);
-                    // }
+
 
 // write your code to post content on server
                 }
