@@ -1,2 +1,5 @@
 # BirthdayApp
-This app is used to store the birthdays of people you know and to remind you when their birthday is close(or to even send wishes to them on your behalf)
+## Features
+* Sends Notification when a birthday is close
+* Can wish the person on WhatsApp by clicking the notification
+* Using college E-mail gives you access to your class' birthdays
